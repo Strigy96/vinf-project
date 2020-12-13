@@ -1,0 +1,10 @@
+{
+    "_comment": "Využil som PUT localhost:9200/linkandredindex/_mapping",
+	"dynamic": "strict",
+	"properties": {
+		"type": {"type" : "text"},
+		"title": {"type" : "text"},
+		"section": {"type" : "text"},
+		"section_title": {"type" : "text"}
+	}
+}
