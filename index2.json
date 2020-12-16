@@ -1,9 +1,21 @@
 {
-    "_comment": "Využil som PUT localhost:9200/linkandredindex",
-	"settings": {
+    	"_comment": "Využil som PUT localhost:9200/linkandredindex",
+    	"settings": {
+		"analysis": {
+			"analyzer": {
+				"analyza": {
+					"type": "custom",
+					"tokenizer": "standard",
+					"filter": [
+						"lowercase",
+						"asciifolding"
+					]
+				}
+			}
+		},
 		"index": {
 			"number_of_shards": 3,
 			"number_of_replicas": 1
 		}
-	}
+	}	
 }

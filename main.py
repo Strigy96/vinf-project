@@ -1,10 +1,25 @@
 from elasticsearch import Elasticsearch
 es = Elasticsearch(['localhost'],port=9200)
 
+def vyhladaj_podla():
+    print("\nPre vyhľadávanie v sekciach stlač A, pre vyhľadávanie v článkoch stlač B, pre vyhľadávanie v sekciách a článkoch zároveň stlač C:")
+    typ_vyhladania = input()
+
+    if typ_vyhladania == "A":
+        print("\nZadaj názov sekcie, ktorú chceš vyhľadať a stlač ENTER:")
+        odpoved = vyhladaj_sekciu_alebo_clanok("section")
+    elif typ_vyhladania == "B":
+        print("\nZadaj názov článku, ktorý chceš vyhľadať a stlač ENTER:")
+        odpoved = vyhladaj_sekciu_alebo_clanok("section_title")
+    elif typ_vyhladania == "C":
+        print("\nZadaj názov sekcie a článku oddelené čiarkou, ktoré chceš vyhľadať a stlač ENTER:")
+        odpoved = vyhladaj_sekciu_a_clanok()
+
+    return odpoved
+
 #FUNKCIA KTORÁ VYHĽADÁ SEKCIU MEDZI REDIRECTMI A ODKAZMI NA SEKCIE 
-def vyhladaj_sekciu():
-    print("\nZadaj názov sekcie, ktorú chceš vyhľadať a stlač ENTER:")
-    nazov_sekcie = input()
+def vyhladaj_sekciu_alebo_clanok(typ): 
+    nazov_sekcie_clanku = input()
     res = es.search(index="linkandredindex", body=
     {
         "size": 1000,
@@ -12,13 +27,47 @@ def vyhladaj_sekciu():
             "bool": {
                 "must": {
                     "match": {
-                        "section": {
+                        typ: {
                             "query": 
-                                nazov_sekcie,
+                                nazov_sekcie_clanku,
                                 "operator": "and"
                         }
                     }
                 }
+            }
+        }
+    })
+    return res
+
+def vyhladaj_sekciu_a_clanok():
+    vstup = input()
+    vstup = vstup.split(", ")
+    nazov_sekcie = vstup[0]
+    nazov_clanku = vstup[1]
+    
+    res = es.search(index="linkandredindex", body=
+    {
+        "size": 1000,
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match": {
+                            "section_title": {
+                                "query": nazov_clanku,
+                                "operator": "and"
+                            }
+                        }
+                    },
+                    {
+                        "match": {
+                            "section": {
+                                "query": nazov_sekcie,
+                                "operator": "and"
+                            }
+                        }
+                    }
+                ]
             }
         }
     })
@@ -40,12 +89,12 @@ def vypis_sekciu(sekciasekcia, sekciasekcia_clanok):
     })
     return res
 
-res = vyhladaj_sekciu()
+res = vyhladaj_podla()
 match = res['hits']['total']['value']
 
 while match == 0:
-    print("Nenašli sa žiadne sekcie, skús ešte raz!")
-    res = vyhladaj_sekciu()
+    print("Nenašli sa žiadne výsledky, skús ešte raz!")
+    res = vyhladaj_podla()
     match = res['hits']['total']['value']
 
 dictionary = {}
